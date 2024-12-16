@@ -35,6 +35,8 @@ def UserSignup(request):
         if serializer.is_valid():
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
+            first_name = serializer.validated_data['first_name']
+            last_name = serializer.validated_data['last_name']
             password = serializer.validated_data['password']
             password2 = data.get('password2')
 
@@ -56,6 +58,8 @@ def UserSignup(request):
                     "data": {
                         "username": username,
                         "password": password,
+                        "first_name":first_name,
+                        "last_name":last_name
                     },
                 },
             )
@@ -115,7 +119,8 @@ def VerifyOTP(request):
 
             username = temp_data.data.get('username')
             password = temp_data.data.get('password')
-
+            first_name = temp_data.data.get('first_name')
+            last_name = temp_data.data.get('last_name')
             # Validate OTP
             if temp_data.otp == int(otp):
                 # Create the user
@@ -124,18 +129,20 @@ def VerifyOTP(request):
                     username=user_data['username'],
                     email=email,
                     password=user_data['password'],
+                    first_name=user_data['first_name'],
+                    last_name=user_data['last_name']
                 )
                 user.save()
 
                 
                 
                 subject = "Confirmation of Your Account in LMS"
-                text_content = f"Welcome, {username} to LMS:: Digital Education to Your Child"
+                text_content = f"Welcome, {first_name} {last_name} to LMS:: Digital Education to Your Child"
                 html_content = f"""
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
         <h2 style="text-align: center; color: #007bff;">Welcome to Digital LMS</h2>
         <p style="font-size: 16px; color: #555;">
-            Congratulations! {username}, Your account has been successfully verified. You can now explore and enjoy our Digital LMS for free.
+            Congratulations! {first_name} {last_name}, Your account has been successfully verified. You can now explore and enjoy our Digital LMS for free.
         </p>
         
         <p style="
