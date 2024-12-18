@@ -46,10 +46,11 @@ AI BASED LEARNING MANAGEMENT SYSTEM FOR KIDS:: Backend Part
 3. http://127.0.0.1:8000/auth/student/login/ -> [POST method with JSON body- username, password]
 4. http://127.0.0.1:8000/auth/student/profile/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
 
-5. http://127.0.0.1:8000/auth/instructor/singnup/ -> [POST method with JSON body- email, username, first_name, last_name, password, password2] 6. http://127.0.0.1:8000/auth/instructor/otp-verify/ -> [POST method with JSON body- email,otp] 6 digit otp will be sent in email inbox/spambox
+5. http://127.0.0.1:8000/auth/instructor/singnup/ -> [POST method with JSON body- email, username, first_name, last_name, password, password2]
+6. http://127.0.0.1:8000/auth/instructor/otp-verify/ -> [POST method with JSON body- email,otp] 6 digit otp will be sent in email inbox/spambox
    \*\* read the otp email & after verification see the verification email message also.
-6. http://127.0.0.1:8000/auth/instructor/login/ -> [POST method with JSON body- username, password]
-7. http://127.0.0.1:8000/auth/instructor/profile/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
+7. http://127.0.0.1:8000/auth/instructor/login/ -> [POST method with JSON body- username, password]
+8. http://127.0.0.1:8000/auth/instructor/profile/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
 
 # Test all the APIS as per instructions above
 
