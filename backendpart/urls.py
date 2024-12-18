@@ -19,9 +19,13 @@ from django.urls import path
 from account import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/register/', views.UserSignup),
-    path("auth/verify-otp/", views.VerifyOTP, name="verify-otp"),
-    path('auth/login/', views.UserLogin),
-    path('auth/profile/',views.UserProfile),
+    path('auth/student/register/', views.UserSignup),
+    path("auth/student/verify-otp/", views.VerifyOTP),
+    path('auth/student/login/', views.UserLogin),
+    path('auth/student/profile/',views.UserProfile),
+    path('auth/instructor/signup/', views.InstructorSignup),
+    path('auth/instructor/otp-verify/', views.OtpVerifyInstructor),
+    path('auth/instructor/login/', views.InstructorLogin),
+    path('auth/instructor/profile/', views.InstructorProfile),
     
 ]
