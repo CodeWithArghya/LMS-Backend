@@ -43,10 +43,13 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Localhost frontend
-    "https://127.0.0.1:3000",    # Your production frontend
-    "http://192.168.43.215:3000", # android mobile
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 MIDDLEWARE = [
@@ -141,7 +144,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+        
+    ),
+    'DEFAULT_RENDERER_CLASSES':(
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
