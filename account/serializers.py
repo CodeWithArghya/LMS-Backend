@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from account.models import CourseCreateform
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
@@ -35,3 +37,16 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         return user
+    
+#for create course
+class CourseSerial(serializers.ModelSerializer):
+    class Meta:
+        model = CourseCreateform
+        fields = '__all__'
+    
+    def validate(self, data):
+        if data['course_title'] == None and data['subject_name'] == None:
+            raise serializers.ValidationError("Course Title and Subject Name Cannot be Blank")
+        return data
+    
+    

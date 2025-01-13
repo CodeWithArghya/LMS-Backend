@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account',
     'mailer',
+    'storages',
     'corsheaders',
     'rest_framework',
 ]
@@ -157,3 +158,43 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'eduhublmsofficials@gmail.com'
 EMAIL_HOST_PASSWORD = 'otgw rzoi jsao pcmw'
+
+
+# AWS credentials and S3 bucket settings
+AWS_ACCESS_KEY_ID = 'AKIA5MSUBVORPWUDFLPJ'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'lmseduhub'
+AWS_S3_SIGNATURE_NAME = 's3v4'
+AWS_S3_REGION_NAME = 'ap-south-1'  
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACT = None
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+
+
+STORAGES = {
+
+    # Media file (image) management   
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+    },
+    
+    # CSS and JS file management
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+    },
+}
+
+
+
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [BASE_DIR / 'static']
+

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from account import views
+from account.views import CourseCreateAPIView
 urlpatterns = [
     
     path('auth/student/register/', views.UserSignup),
@@ -27,5 +28,7 @@ urlpatterns = [
     path('auth/instructor/otp-verify/', views.OtpVerifyInstructor),
     path('auth/instructor/login/', views.InstructorLogin),
     path('auth/instructor/profile/', views.InstructorProfile),
+    path('api/user-activity/', views.UserActivityAPIView),
+    path('api/instructor/create-course/', CourseCreateAPIView.as_view()),
     
 ]
