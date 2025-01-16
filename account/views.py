@@ -480,7 +480,7 @@ def UserActivityAPIView(request):
     cache.set(tab_switch_key, tab_switch_count, timeout=3600)  # Store for 1 hour
 
     # Prepare the default email data
-    subject = 'Children Activity Detected'
+    subject = 'Your Kids Browser Activity Detected'
     message = f"Your Child->> {user.username} has switched browser tabs or closed the browser."
     from_email = settings.EMAIL_HOST_USER
     recipient_list = [user.email]
