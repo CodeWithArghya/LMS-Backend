@@ -521,7 +521,7 @@ class CourseCreateAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             try:
-                subject = "Content is Submitted for Review"
+                subject = "Content is Submitted successfully for Review"
                 text_content = f"Thank You, {first_name} {last_name} for Contributing in EduHub:: Digital Education to Your Child"
                 html_content = f"""
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
@@ -571,3 +571,6 @@ class CourseCreateAPIView(APIView):
                 print(f"Email sending failed: {e}")
                 return Response({'status': 'error', 'message': 'Course added, but email could not be sent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# update code here again
+    
