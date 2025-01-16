@@ -527,7 +527,7 @@ class CourseCreateAPIView(APIView):
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
         <h2 style="text-align: center; color: #007bff;">Welcome to EduHub</h2>
         <p style="font-size: 16px; color: #555;">
-            Congratulations! {first_name} {last_name}, Your Content has been successfully Submitted. It will be Verified by Admin & Published in the Portal. We will notify you once it will publish.
+            Congratulations! {first_name} {last_name}, Your Content has been successfully Submitted. It will be Verified by Admin and it will Published in the Portal. We will notify you once it will publish.
         </p>
         
         
