@@ -572,5 +572,51 @@ class CourseCreateAPIView(APIView):
                 return Response({'status': 'error', 'message': 'Course added, but email could not be sent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-# update code here again
+# all courses dsiplay to athenticated users if the courses is approved by admin
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplayCourses(request):
     
+    if request.method == "GET":
+        courses = CourseCreateform.objects.filter(current_status="Approved")
+        serial = CourseSerial(courses, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)
+    
+# display courses uploaded by specific instructor
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplaySpecificCourses(request, username):
+    
+    if request.method == "GET":
+        courses = CourseCreateform.objects.filter(uploaded_by=username)
+        serial = CourseSerial(courses, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND) 
+    
+@api_view(['GET', 'PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def CourseEditByInstructor(request, username, id):
+    # Fetch course uploaded by the specific instructor
+    course = CourseCreateform.objects.filter(id=id, uploaded_by=username).first()
+
+    if not course:
+        return Response({'msg': 'No Course Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = CourseSerial(course)
+        return Response({'course': serial.data}, status=status.HTTP_200_OK)
+
+    elif request.method == "PUT":
+        serial = CourseSerial(course, data=request.data, partial=True)  # Allows partial updates
+        if serial.is_valid():
+            serial.save()
+            return Response({'msg': 'Course Updated Successfully'}, status=status.HTTP_200_OK)
+        return Response(serial.errors, status=status.HTTP_400_BAD_REQUEST)       
+    
+        
