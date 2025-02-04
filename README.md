@@ -2,7 +2,7 @@
 
 AI BASED LEARNING MANAGEMENT SYSTEM FOR KIDS:: Backend Part
 
-# This is Auth (Authorization) :: Login and Signup System for both the Students, Instructors and Admin
+# This is Course Create/Modify/Get test for API for Instructors & Students
 
 # Test Seperately as per Url Provided in the urls.py
 
@@ -12,23 +12,14 @@ AI BASED LEARNING MANAGEMENT SYSTEM FOR KIDS:: Backend Part
 
 # Installation Guide::
 
-1. Install Python 3.12.7 for Windows x64 link- https://www.python.org/downloads/
-2. Create any Folder and inside that folder open VS code and clone this backend project.
-   git clone https://github.com/CodeWithArghya/LMS-Backend.git
-3. Install all dependencies like django, djangorest, djangojwt, djangomailer etc etc by running below command in terminal
-   pip install -r requirements.txt
+1. Use SQL file provided in Whatsapp Group & Import that SQL file in your local Postgresql DB.
+2. Pull Updated Code from this repo.
+3. Run > py manage.py makemigrations
+4. Run > py manage.py migrate
+5. To run the server ->> py manage.py runserver
+6. Now check from 127.0.0.1/auth/XXXXXXXXXXX (as per url provided):: test accordingly as per the backend
 
-4. Download & Install, configure properly POstgreSQL RDBMS for Windows from this link- https://www.postgresql.org/download/windows/
-
-5. After that run the following command in Project Base directory
-   a) py manage.py makemigrations
-   b) py manage.py migrate
-
-6. To run the server ->> py manage.py runserver
-
-7. Now check from 127.0.0.1/auth/XXXXXXXXXXX (as per url provided):: test accordingly as per the backend
-
-# Any Problem/doubt ask me
+# Any Problem/doubt ask me:: I am ready for assisting you
 
 # Do not modify/change anything in the source code
 
@@ -40,22 +31,20 @@ AI BASED LEARNING MANAGEMENT SYSTEM FOR KIDS:: Backend Part
 
 # Details of APIS for auth of both student and instructors
 
-1. http://127.0.0.1:8000/auth/student/register/ -> [POST method with JSON body- email, username, first_name, last_name, password, password2]
-2. http://127.0.0.1:8000/auth/student/verify-otp/ -> [POST method with JSON body- email,otp] 6 digit otp will be sent in email inbox/spambox
-   \*\* read the otp email & after verification see the verification email message also.
-3. http://127.0.0.1:8000/auth/student/login/ -> [POST method with JSON body- username, password]
-4. http://127.0.0.1:8000/auth/student/profile/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
+# Login first as a instructor / student
+1. http://127.0.0.1:8000/api/allcourses/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
+2. http://127.0.0.1:8000/api/instructor/create-course/ -> [POST method with JSON body- course_title,subject_name,for_class (e.g- primary),duration,  teacher_name,description,prerequites,course_outcomes,current_status, uploaded_by,
+    # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.) *** Use Formdata in POstman
+    coursethubmnail, classnote, coursecontent]
 
-5. http://127.0.0.1:8000/auth/instructor/singnup/ -> [POST method with JSON body- email, username, first_name, last_name, password, password2]
-6. http://127.0.0.1:8000/auth/instructor/otp-verify/ -> [POST method with JSON body- email,otp] 6 digit otp will be sent in email inbox/spambox
-   \*\* read the otp email & after verification see the verification email message also.
-7. http://127.0.0.1:8000/auth/instructor/login/ -> [POST method with JSON body- username, password]
-8. http://127.0.0.1:8000/auth/instructor/profile/ -> [GET method without any JSON body, but in header must provide access_token which you will get after login response as Bearer token....... and enable Authorization in header]
+3. http://127.0.0.1:8000/api/coursemodify/<username>/<id>/ -> [PUT method with JSON body- same as create-course] # provide username and courseid (after login)
+4.  http://127.0.0.1:8000/api/specificcourses/<username>/-> [GET method] # provide any specific username along with access_token in header after login
 
 # Test all the APIS as per instructions above
 
 # Test both the positive response and negtive response to check either all reponse and error messages are working properly or not
 
-# save all the screenshots and share your test result in proper google form, link will be provied you here.
+# save all the screenshots and share your test result in our official Whatsapp Group.
 
-# Link of Google form to upload all result -
+# Last date for Test Case Result Submission is ->> 06.02.2025
+All The Best +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
