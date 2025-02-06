@@ -613,9 +613,59 @@ def CourseEditByInstructor(request, username, id):
         return Response({'course': serial.data}, status=status.HTTP_200_OK)
 
     elif request.method == "PUT":
+        data = request.data
+        data['uploaded_by'] = request.user.username
+        user = request.user
+        first_name = user.first_name
+        last_name = user.last_name
+        email = user.email
         serial = CourseSerial(course, data=request.data, partial=True)  # Allows partial updates
         if serial.is_valid():
             serial.save()
+            subject = "Content is Successfully Updated"
+            text_content = f"Thank You, {first_name} {last_name} for Contributing in EduHub:: Digital Education to Your Child"
+            html_content = f"""
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
+        <h2 style="text-align: center; color: #007bff;">Welcome to EduHub</h2>
+        <p style="font-size: 16px; color: #555;">
+            Congratulations! {first_name} {last_name}, Your Content has been successfully Updated. It will Re-Published soon in the Portal. Please Check after Sometime for the updated Content. 
+        </p>
+        
+        
+
+        <p style="font-size: 16px; color: #555;">
+            Click the button below to log in to your account to check Course.
+        </p>
+        <a href="http://localhost:5173/" style="
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        ">
+            Click Here to Login Your Account
+        </a>
+        <p style="font-size: 14px; text-align: center; color: #999;">
+            If you face any technical issue, please  contact with us by reply in this mail.
+        </p>
+    </div>"""
+
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                    body=text_content,
+                    from_email="eduhublmsofficials@gmail.com",
+                    to=[email],
+                )
+            email_message.attach_alternative(html_content, "text/html")
+            email_message.send(fail_silently=False)
             return Response({'msg': 'Course Updated Successfully'}, status=status.HTTP_200_OK)
         return Response(serial.errors, status=status.HTTP_400_BAD_REQUEST)       
     
