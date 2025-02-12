@@ -574,8 +574,7 @@ class CourseCreateAPIView(APIView):
     
 # all courses dsiplay to athenticated users if the courses is approved by admin
 @api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+
 def DisplayCourses(request):
     
     if request.method == "GET":
@@ -584,6 +583,16 @@ def DisplayCourses(request):
         return Response({'courses':serial.data}, status=status.HTTP_200_OK)
     else:
         return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)
+    
+#specific course details
+@api_view(['GET'])
+def DisplayOneCourses(request, id):
+    try:
+        course = CourseCreateform.objects.get(current_status="Approved", id=id)
+        serial = CourseSerial(course)  # No need for `many=True` as it's a single object
+        return Response({'course': serial.data}, status=status.HTTP_200_OK)
+    except CourseCreateform.DoesNotExist:
+        return Response({'msg': 'No Course Found'}, status=status.HTTP_404_NOT_FOUND)  
     
 # display courses uploaded by specific instructor
 @api_view(['GET'])

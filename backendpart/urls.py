@@ -30,6 +30,7 @@ urlpatterns = [
     path('auth/instructor/profile/', views.InstructorProfile),
     path('api/user-activity/', views.UserActivityAPIView),
     path('api/allcourses/', views.DisplayCourses),
+    path('api/coursedetails/<id>/', views.DisplayOneCourses),
     path('api/coursemodify/<username>/<id>/', views.CourseEditByInstructor),
     path('api/specificcourses/<username>/', views.DisplaySpecificCourses),
     path('api/instructor/create-course/', CourseCreateAPIView.as_view()),
