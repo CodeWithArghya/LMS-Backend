@@ -1,14 +1,15 @@
 from rest_framework import status
+import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import authentication, permissions
-from .serializers import RegisterSerializer, CourseSerial
+from .serializers import RegisterSerializer, CourseSerial,ClassSerial
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 import random
-from account.models import CourseCreateform
+from account.models import CourseCreateform, ClassCreateform
 from django.core.cache import cache 
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -504,72 +505,21 @@ def UserActivityAPIView(request):
     except Exception as e:
         return Response({'status': 'error', 'message': 'Failed to send email notification.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    
+from rest_framework.parsers import MultiPartParser, FormParser  
 class CourseCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
+    parser_classes = (MultiPartParser, FormParser)
     def post(self, request, *args, **kwargs):
         data = request.data
         data['uploaded_by'] = request.user.username
-        user = request.user
-        first_name = user.first_name
-        last_name = user.last_name
-        email = user.email
+        
+        
         
         
         serializer = CourseSerial(data=data)
         if serializer.is_valid():
             serializer.save()
-            try:
-                subject = "Content is Submitted successfully for Review"
-                text_content = f"Thank You, {first_name} {last_name} for Contributing in EduHub:: Digital Education to Your Child"
-                html_content = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
-        <h2 style="text-align: center; color: #007bff;">Welcome to EduHub</h2>
-        <p style="font-size: 16px; color: #555;">
-            Congratulations! {first_name} {last_name}, Your Content has been successfully Submitted. It will be Verified by Admin and it will Published in the Portal. We will notify you once it will publish.
-        </p>
-        
-        
-
-        <p style="font-size: 16px; color: #555;">
-            Click the button below to log in to your account and start your Teaching journey.
-        </p>
-        <a href="http://localhost:5173/" style="
-            display: block;
-            width: fit-content;
-            margin: 20px auto;
-            text-align: center;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border-radius: 5px;
-            text-decoration: none;
-            border: 1px solid #007bff;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        ">
-            Click Here to Login Your Account
-        </a>
-        <p style="font-size: 14px; text-align: center; color: #999;">
-            If you face any technical issue, please  contact with us by reply in this mail.
-        </p>
-    </div>"""
-
-                email_message = EmailMultiAlternatives(
-                    subject=subject,
-                    body=text_content,
-                    from_email="eduhublmsofficials@gmail.com",
-                    to=[email],
-                )
-                email_message.attach_alternative(html_content, "text/html")
-                email_message.send(fail_silently=False)
-
-                return Response({'status': 'success', 'message': 'Course Submitted & Under Review, Check Email'}, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                print(f"Email sending failed: {e}")
-                return Response({'status': 'error', 'message': 'Course added, but email could not be sent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'status': 'success', 'message': 'Course added, but email could not be sent'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # all courses dsiplay to athenticated users if the courses is approved by admin
@@ -593,7 +543,17 @@ def DisplayOneCourses(request, id):
         return Response({'course': serial.data}, status=status.HTTP_200_OK)
     except CourseCreateform.DoesNotExist:
         return Response({'msg': 'No Course Found'}, status=status.HTTP_404_NOT_FOUND)  
-    
+   
+# for instructor
+#specific course details
+@api_view(['GET'])
+def INSDisplayOneCourses(request, id):
+    try:
+        course = CourseCreateform.objects.get( id=id)
+        serial = CourseSerial(course)  # No need for `many=True` as it's a single object
+        return Response({'course': serial.data}, status=status.HTTP_200_OK)
+    except CourseCreateform.DoesNotExist:
+        return Response({'msg': 'No Course Found'}, status=status.HTTP_404_NOT_FOUND)      
 # display courses uploaded by specific instructor
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -622,60 +582,138 @@ def CourseEditByInstructor(request, username, id):
         return Response({'course': serial.data}, status=status.HTTP_200_OK)
 
     elif request.method == "PUT":
-        data = request.data
+        
+        data = request.data.copy()
         data['uploaded_by'] = request.user.username
-        user = request.user
-        first_name = user.first_name
-        last_name = user.last_name
-        email = user.email
+        
+        
         serial = CourseSerial(course, data=request.data, partial=True)  # Allows partial updates
         if serial.is_valid():
             serial.save()
-            subject = "Content is Successfully Updated"
-            text_content = f"Thank You, {first_name} {last_name} for Contributing in EduHub:: Digital Education to Your Child"
-            html_content = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
-        <h2 style="text-align: center; color: #007bff;">Welcome to EduHub</h2>
-        <p style="font-size: 16px; color: #555;">
-            Congratulations! {first_name} {last_name}, Your Content has been successfully Updated. It will Re-Published soon in the Portal. Please Check after Sometime for the updated Content. 
-        </p>
-        
-        
-
-        <p style="font-size: 16px; color: #555;">
-            Click the button below to log in to your account to check Course.
-        </p>
-        <a href="http://localhost:5173/" style="
-            display: block;
-            width: fit-content;
-            margin: 20px auto;
-            text-align: center;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border-radius: 5px;
-            text-decoration: none;
-            border: 1px solid #007bff;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        ">
-            Click Here to Login Your Account
-        </a>
-        <p style="font-size: 14px; text-align: center; color: #999;">
-            If you face any technical issue, please  contact with us by reply in this mail.
-        </p>
-    </div>"""
-
-            email_message = EmailMultiAlternatives(
-                subject=subject,
-                    body=text_content,
-                    from_email="eduhublmsofficials@gmail.com",
-                    to=[email],
-                )
-            email_message.attach_alternative(html_content, "text/html")
-            email_message.send(fail_silently=False)
+            
             return Response({'msg': 'Course Updated Successfully'}, status=status.HTTP_200_OK)
         return Response(serial.errors, status=status.HTTP_400_BAD_REQUEST)       
     
         
+# for update
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def CourseDeleteByInstructor(request, username, id):
+    # Fetch course uploaded by the specific instructor
+    course = CourseCreateform.objects.filter(id=id, uploaded_by=username).first()
+
+    if not course:
+        return Response({'msg': 'No Course Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = CourseSerial(course)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        course.delete()  # Proper deletion
+        return Response({'msg': 'Course Deleted Successfully'}, status=status.HTTP_200_OK)
+   
+    
+# class Scheudle
+class ClassCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['teacher'] = request.user.username
+
+        serializer = ClassSerial(data=data)
+        if serializer.is_valid():
+            serializer.save()
+
+            # ✅ Send a POST request to the external API (no payload)
+            external_api_url = "https://wcsp440x1d.execute-api.ap-south-1.amazonaws.com/default/ParentsMeet/demo"
+
+            try:
+                requests.post(external_api_url, timeout=20)  # ✅ No data sent, just a POST request
+            except requests.exceptions.RequestException as e:
+                return Response({
+                    "status": "error",
+                    "message": "Class scheduled, but external API request failed.",
+                    "error": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({
+                'status': 'success',
+                'message': 'Live Class Scheduled Successfully.'
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+# display classes uploaded by specific instructor
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplaySpecificClass(request, username):
+    
+    if request.method == "GET":
+        classes = ClassCreateform.objects.filter(teacher=username)
+        serial = ClassSerial(classes, many=True)
+        return Response({'classes':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Class is Scheduled Yet'}, status=status.HTTP_404_NOT_FOUND) 
+                       
+                       
+# all sechulded class data for displaging in the student dashboard
+@api_view(['GET'])
+
+def DisplayClasses(request):
+    
+    if request.method == "GET":
+        classes = ClassCreateform.objects.all()
+        serial = ClassSerial(classes, many=True)
+        return Response({'classes':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'Class not yet Scheduled'}, status=status.HTTP_404_NOT_FOUND)                       
+    
+      
+# for delete a class
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ClassDeleteByInstructor(request, username, id):
+    # Fetch course uploaded by the specific instructor
+    classes = ClassCreateform.objects.filter(id=id, teacher=username).first()
+
+    if not classes:
+        return Response({'msg': 'No Class Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = ClassSerial(classes)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        classes.delete()  # Proper deletion
+        return Response({'msg': 'Class Deleted Successfully'}, status=status.HTTP_200_OK)    
+    
+# counting total courses
+@api_view(['GET'])
+
+def DisplayTotalCourses(request):
+    
+    if request.method == "GET":
+        total_courses = CourseCreateform.objects.count()
+        total_students = User.objects.filter(username__startswith="STD").count()
+        total_ins = User.objects.filter(username__startswith="INS").count()
+        
+        return Response(
+            {
+                'totalcourses': total_courses,
+                'totalstudents': total_students,
+                'totalins':total_ins
+            },
+            status=status.HTTP_200_OK
+        )
+    else:
+        return Response({'msg':'No course found'}, status=status.HTTP_404_NOT_FOUND)     

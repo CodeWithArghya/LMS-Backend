@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from account.models import CourseCreateform
+from account.models import CourseCreateform, ClassCreateform
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -49,4 +49,15 @@ class CourseSerial(serializers.ModelSerializer):
             raise serializers.ValidationError("Course Title and Subject Name Cannot be Blank")
         return data
     
+
+#for live class creation
+class ClassSerial(serializers.ModelSerializer):
+    class Meta:
+        model = ClassCreateform
+        fields = '__all__'
     
+    def validate(self, data):
+        if data['subjectName'] == None and data['joinLink'] == None:
+            raise serializers.ValidationError("Subject Name and Joining Link filed Cannot be Blank")
+        return data
+        

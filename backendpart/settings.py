@@ -159,6 +159,18 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'eduhublmsofficials@gmail.com'
 EMAIL_HOST_PASSWORD = 'nqkc cdwj nkxy lwwa'
 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),  # Extend to 1 hour (change as needed)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Extend refresh token to 7 days
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 
 
 # AWS credentials and S3 bucket settings

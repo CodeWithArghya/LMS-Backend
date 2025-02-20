@@ -28,8 +28,24 @@ class CourseCreateform(models.Model):
 
 
     # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.)
-    coursethubmnail = models.ImageField(upload_to='uploads/coursethumbnail/', null=True, blank=True) # must be image and not blank
+    coursethubmnail = models.FileField(upload_to='uploads/coursethumbnail/', null=True, blank=True) # must be image and not blank
     classnote = models.FileField(upload_to='uploads/classnote/', null=True, blank=True)
     coursecontent = models.FileField(upload_to='uploads/coursecontent/', null=True, blank=True)
+    courseassessment = models.FileField(upload_to='upload/courseassessment/', null=True, blank=True)
+    
+# live class creaion
+class ClassCreateform(models.Model):
+    subjectName = models.CharField(max_length=50)
+    duration = models.IntegerField()
+    teacher =  models.ForeignKey(
+        User,
+        to_field='username',  # Use the username field as the foreign key
+        on_delete=models.CASCADE,
+        related_name="uploaded_class"
+    )
+    topic = models.CharField(max_length=50)
+    datetime = models.DateTimeField()
+    for_class = models.CharField(max_length=10)
+    joinLink = models.URLField(max_length=200)   
     
 
