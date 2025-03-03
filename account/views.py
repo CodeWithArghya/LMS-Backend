@@ -4,12 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import authentication, permissions
-from .serializers import RegisterSerializer, CourseSerial,ClassSerial
+from .serializers import RegisterSerializer, CourseSerial,ClassSerial, LWFAssessmentSerial
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 import random
-from account.models import CourseCreateform, ClassCreateform
+from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform
 from django.core.cache import cache 
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -716,4 +716,138 @@ def DisplayTotalCourses(request):
             status=status.HTTP_200_OK
         )
     else:
-        return Response({'msg':'No course found'}, status=status.HTTP_404_NOT_FOUND)     
+        return Response({'msg':'No course found'}, status=status.HTTP_404_NOT_FOUND)   
+
+
+# LWF Assessment for the Instructor    
+class LWFAssessmentCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        
+        data['uploaded_by'] = request.user.username  # Ensure correct foreign key reference
+
+        serializer = LWFAssessmentSerial(data=data)  # Use the correct serializer
+        if serializer.is_valid():
+            serializer.save()  # Pass user object, not username
+            return Response({'status': 'success', 'message': 'Assessment added successfully'}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+# displaying the assessment to the student section
+
+@api_view(['GET'])
+
+def DisplayLWFAssessment(request):
+    
+    if request.method == "GET":
+        lwf = LWFAssessmentCreateform.objects.all()
+        serial = LWFAssessmentSerial(lwf, many=True)
+        return Response({'assessments':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Assessment Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+    
+# image analysis & User Activity
+@api_view(['POST','GET'])
+def UserActivityAPIView(request):
+        # Extract user information (e.g., from request.user or session)
+        user = request.user  # Assuming you have user authentication in place
+        email = user.email
+
+        # Send email notification
+        subject = 'User Activity Detected'
+        message = f"User {user.username} has switched browser tabs or closed the browser."
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+            return Response({'status': 'success', 'message': 'Email notification sent.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': 'Failed to send email notification.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+import json
+import base64
+import requests
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.parsers import MultiPartParser, FormParser
+
+@api_view(['POST'])
+def analyze_image(request):
+    if 'image' not in request.FILES:
+        return JsonResponse({"error": "No image uploaded"}, status=400)
+
+    image_file = request.FILES['image']
+    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    api_key = "AIzaSyD9geiD-UIbtjlYr5RFPY6ZaDrktPlw648"
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": "Identify the picture and generate 20 easy question answer about it for 5 years old kids in proper JSON format"},
+                    {"inline_data": {"mime_type": "image/png", "data": base64_image}}
+                ]
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(api_url, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract the raw text content from the API response
+            text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+
+           
+
+            # Check if 'text' has the expected JSON string format
+            if text.startswith("```json\n") and text.endswith("\n```"):
+                text = text[len("```json\n"): -len("\n```")]
+
+            
+
+            # Now try to parse the cleaned-up text
+            try:
+                # Parse the JSON response from the text
+                parsed_response = json.loads(text)
+
+                # Extract the picture and qa fields
+                picture = parsed_response.get("picture", "")
+                qa = parsed_response.get("questions", [])
+
+                # Format the response to match the desired structure
+                formatted_response = {
+                    "question": picture,
+                    "ans": [{"question": qa_item.get("question"), "answer": qa_item.get("answer")} for qa_item in qa]
+                }
+
+                
+
+                # Return the formatted response as JSON
+                return JsonResponse(formatted_response, safe=False)
+
+            except json.JSONDecodeError as e:
+                print("Error parsing JSON:", e)
+                return JsonResponse({"error": f"Failed to parse JSON: {str(e)}"}, status=500)
+
+        else:
+            return JsonResponse(
+                {"error": "Error analyzing the image", "details": response.text},
+                status=response.status_code
+            )
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": "Network error", "details": str(e)}, status=500)
+           

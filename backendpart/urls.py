@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from account import views
-from account.views import CourseCreateAPIView,ClassCreateAPIView
+from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView
 urlpatterns = [
     
     path('auth/student/register/', views.UserSignup),
@@ -37,9 +37,13 @@ urlpatterns = [
     path('api/specificcourses/<username>/', views.DisplaySpecificCourses),
     path('api/specificclasses/<username>/', views.DisplaySpecificClass),
     path('api/student/displayclasses/', views.DisplayClasses),
+    path('api/user-activity/', views.UserActivityAPIView),
+    path('api/object/', views.analyze_image),
+    path('api/student/displaylwfassessment/', views.DisplayLWFAssessment),
     path('api/instructor/class-delete/<username>/<id>/', views.ClassDeleteByInstructor),
     path('api/instructor/create-course/', CourseCreateAPIView.as_view()),
     path('api/instructor/create-class/', ClassCreateAPIView.as_view()),
+    path('api/instructor/create-lwf-assessment/', LWFAssessmentCreateAPIView.as_view()),
     path('api/home/dynamicdisplay/', views.DisplayTotalCourses),
     
 ]

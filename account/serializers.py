@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from account.models import CourseCreateform, ClassCreateform
+from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -48,6 +48,24 @@ class CourseSerial(serializers.ModelSerializer):
         if data['course_title'] == None and data['subject_name'] == None:
             raise serializers.ValidationError("Course Title and Subject Name Cannot be Blank")
         return data
+    
+#for create LWFAssessment
+class LWFAssessmentSerial(serializers.ModelSerializer):
+    class Meta:
+        model = LWFAssessmentCreateform
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+    def validate(self, data):
+        title = data.get('title')
+        instruction = data.get('instruction')
+
+        if not title and not instruction:
+            raise serializers.ValidationError("Title and Instructions cannot be blank")
+
+        return data
+    
+       
     
 
 #for live class creation

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 
 class CourseCreateform(models.Model):
@@ -46,6 +47,28 @@ class ClassCreateform(models.Model):
     topic = models.CharField(max_length=50)
     datetime = models.DateTimeField()
     for_class = models.CharField(max_length=10)
-    joinLink = models.URLField(max_length=200)   
+    joinLink = models.URLField(max_length=200)
+    
+    
+# LWF Assessment Form    
+class LWFAssessmentCreateform(models.Model):
+    
+    
+    title = models.CharField(max_length=50)
+    instruction = models.CharField(max_length=250)
+    
+    uploaded_by = models.ForeignKey(
+        User,
+        to_field='username',  # Use the username field as the foreign key
+        on_delete=models.CASCADE,
+        related_name="uploaded_assessment"
+    )
+
+    # Add current date field
+    created_at = models.DateField( auto_now_add=True)
+
+    # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.)
+    image = models.FileField(upload_to='uploads/LWFAssessment/', null=True, blank=True) # must be image and not blank
+          
     
 
