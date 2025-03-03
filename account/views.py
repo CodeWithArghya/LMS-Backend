@@ -752,26 +752,26 @@ def DisplayLWFAssessment(request):
     
     
 # image analysis & User Activity
-@api_view(['POST','GET'])
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Enforces authentication
 def UserActivityAPIView(request):
-        # Extract user information (e.g., from request.user or session)
-        user = request.user  # Assuming you have user authentication in place
-        email = user.email
+    user = request.user
 
-        # Send email notification
-        subject = 'User Activity Detected'
-        message = f"User {user.username} has switched browser tabs or closed the browser."
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = [email]
+    if not user.is_authenticated:
+        return Response({'status': 'error', 'message': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        try:
-            send_mail(subject, message, from_email, recipient_list)
-            return Response({'status': 'success', 'message': 'Email notification sent.'}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'status': 'error', 'message': 'Failed to send email notification.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    email = user.email
 
+    subject = 'User Activity Detected'
+    message = f"User {user.first_name} {user.last_name} has switched browser tabs or closed the browser during Assessment/Quize."
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [email]
 
-
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        return Response({'status': 'success', 'message': 'Email notification sent.'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'status': 'error', 'message': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 import json
 import base64
