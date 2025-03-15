@@ -17,7 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from account import views
-from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView
+from rest_framework.routers import DefaultRouter
+from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment
+
+
+
 urlpatterns = [
     
     path('auth/student/register/', views.UserSignup),
@@ -33,7 +37,9 @@ urlpatterns = [
     path('api/coursedetails/<id>/', views.DisplayOneCourses),
     path('api/inscoursedetails/<id>/', views.INSDisplayOneCourses),
     path('api/coursemodify/<username>/<id>/', views.CourseEditByInstructor),
+    path('api/instructor/assignment-modify/<username>/<id>/', views.AssignmentEditByInstructor),
     path('api/deletecourse/<username>/<id>/', views.CourseDeleteByInstructor),
+    path('api/instructor/delete-assignment/<username>/<id>/', views.AssignmentDeleteByInstructor),
     path('api/specificcourses/<username>/', views.DisplaySpecificCourses),
     path('api/specificclasses/<username>/', views.DisplaySpecificClass),
     path('api/student/displayclasses/', views.DisplayClasses),
@@ -43,7 +49,12 @@ urlpatterns = [
     path('api/instructor/class-delete/<username>/<id>/', views.ClassDeleteByInstructor),
     path('api/instructor/create-course/', CourseCreateAPIView.as_view()),
     path('api/instructor/create-class/', ClassCreateAPIView.as_view()),
+    path('api/student/display-assignments/', views.DisplayAssignment),
     path('api/instructor/create-lwf-assessment/', LWFAssessmentCreateAPIView.as_view()),
+    path('api/instructor/create-assignment/', DeadlineAssignment.as_view()),
     path('api/home/dynamicdisplay/', views.DisplayTotalCourses),
+    path('api/assignments/<int:id>/submit/', views.submit_assignment, name='submit-assignment'),
+    path('api/instructor/view-submissions/', views.teacher_submissions, name='teacher-submissions'),
+   
     
 ]

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform
+from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -65,6 +65,23 @@ class LWFAssessmentSerial(serializers.ModelSerializer):
 
         return data
     
+    
+#for create DeadlineManegement
+class DeadlineSerial(serializers.ModelSerializer):
+    class Meta:
+        model = DeadlineManagement
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+    def validate(self, data):
+        topic = data.get('topic')
+        description = data.get('description')
+
+        if not topic and not description:
+            raise serializers.ValidationError("Topic and Description cannot be blank")
+
+        return data    
+    
        
     
 
@@ -78,4 +95,20 @@ class ClassSerial(serializers.ModelSerializer):
         if data['subjectName'] == None and data['joinLink'] == None:
             raise serializers.ValidationError("Subject Name and Joining Link filed Cannot be Blank")
         return data
+    
+    
+class AssignmentSubmissionSerializer(serializers.ModelSerializer):
+    student = serializers.StringRelatedField()  # Show username instead of ID
+    assignment = serializers.StringRelatedField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssignmentSubmission
+        fields = ['id', 'assignment', 'student', 'submitted_at', 'answer_file', 'status']
+
+    def get_status(self, obj):
+        return obj.status()    
+
+
+ 
         

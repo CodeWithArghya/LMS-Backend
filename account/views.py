@@ -1,15 +1,16 @@
 from rest_framework import status
 import requests
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import authentication, permissions
-from .serializers import RegisterSerializer, CourseSerial,ClassSerial, LWFAssessmentSerial
+from .serializers import RegisterSerializer, CourseSerial,ClassSerial, LWFAssessmentSerial, DeadlineSerial, AssignmentSubmissionSerializer
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 import random
-from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform
+from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
 from django.core.cache import cache 
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -595,7 +596,7 @@ def CourseEditByInstructor(request, username, id):
         return Response(serial.errors, status=status.HTTP_400_BAD_REQUEST)       
     
         
-# for update
+# for delete
 @api_view(['GET',  'DELETE'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -850,4 +851,121 @@ def analyze_image(request):
 
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": "Network error", "details": str(e)}, status=500)
-           
+    
+    
+    
+# LWF Deadline Management for Instructor  
+class DeadlineAssignment(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        
+        data['uploaded_by'] = request.user.username  # Ensure correct foreign key reference
+
+        serializer = DeadlineSerial(data=data)  # Use the correct serializer
+        if serializer.is_valid():
+            serializer.save()  # Pass user object, not username
+            # ✅ Send a POST request to the external API (no payload)
+            external_api_url = "https://wcsp440x1d.execute-api.ap-south-1.amazonaws.com/default/ParentsMeet/demo" # api have to change accordingly
+
+            try:
+                requests.post(external_api_url, timeout=20)  # ✅ No data sent, just a POST request
+            except requests.exceptions.RequestException as e:
+                return Response({
+                    "status": "error",
+                    "message": "Asssigment Send, but external API request failed.",
+                    "error": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'status': 'success', 'message': 'Assignment added successfully'}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
+   
+# modify assignment deadlines    
+@api_view(['GET', 'PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def AssignmentEditByInstructor(request, username, id):
+    # Fetch assigmnet uploaded by the specific instructor
+    assignment = DeadlineManagement.objects.filter(id=id, uploaded_by=username).first()
+
+    if not assignment:
+        return Response({'msg': 'No Assignment Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = DeadlineSerial(assignment)
+        return Response({'assignment': serial.data}, status=status.HTTP_200_OK)
+
+    elif request.method == "PUT":
+        
+        data = request.data.copy()
+        data['uploaded_by'] = request.user.username
+        
+        
+        serial = DeadlineSerial(assignment, data=request.data, partial=True)  # Allows partial updates
+        if serial.is_valid():
+            serial.save()
+            
+            return Response({'msg': 'Assignment Updated Successfully'}, status=status.HTTP_200_OK)
+        return Response(serial.errors, status=status.HTTP_400_BAD_REQUEST)      
+# displaying the assessment to the student section
+
+@api_view(['GET'])
+
+def DisplayAssignment(request):
+    
+    if request.method == "GET":
+        assignment = DeadlineManagement.objects.all()
+        serial = DeadlineSerial(assignment, many=True)
+        return Response({'assessments':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Assignment Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+    
+# for delete
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def AssignmentDeleteByInstructor(request, username, id):
+    # Fetch course uploaded by the specific instructor
+    assignment = DeadlineManagement.objects.filter(id=id, uploaded_by=username).first()
+
+    if not assignment:
+        return Response({'msg': 'No Assignment Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = DeadlineSerial(assignment)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        assignment.delete()  # Proper deletion
+        return Response({'msg': 'Assignment Deleted Successfully'}, status=status.HTTP_200_OK)
+       
+#SUBMIT AN ASSIGNMENT (Only Students)
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def submit_assignment(request, id):
+    assignment = get_object_or_404(DeadlineManagement, id=id)
+
+    serializer = AssignmentSubmissionSerializer(data=request.data)
+    if serializer.is_valid():
+        
+        serializer.save(student=request.user, assignment=assignment)  # Assign student & assignment
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#TEACHERS CAN VIEW SUBMISSIONS FOR THEIR ASSIGNMENTS ONLY
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def teacher_submissions(request):
+    """Teachers can only see submissions for assignments they uploaded."""
+    user = request.user
+    if not user.uploaded_assignment.exists():
+        return Response({"message": "You haven't uploaded any assignments yet."})
+
+    submissions = AssignmentSubmission.objects.filter(assignment__uploaded_by=user)
+    serializer = AssignmentSubmissionSerializer(submissions, many=True)
+    return Response(serializer.data)

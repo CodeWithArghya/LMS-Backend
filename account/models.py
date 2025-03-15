@@ -69,6 +69,48 @@ class LWFAssessmentCreateform(models.Model):
 
     # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.)
     image = models.FileField(upload_to='uploads/LWFAssessment/', null=True, blank=True) # must be image and not blank
-          
+    
+# LWF Deadline Management Assignment   
+class DeadlineManagement(models.Model):
+    
+    
+    topic = models.CharField(max_length=50)
+    subject  = models.CharField(max_length=50)
+    for_class = models.CharField(max_length=20)
+    description = models.CharField(max_length=250)
+    
+    uploaded_by = models.ForeignKey(
+        User,
+        to_field='username',  # Use the username field as the foreign key
+        on_delete=models.CASCADE,
+        related_name="uploaded_assignment"
+    )
+
+    # Add current date field
+    deadline = models.DateField()
+    created_at = models.DateField( auto_now_add=True)
+    # deadline
     
 
+    # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.)
+    content = models.FileField(upload_to='uploads/LWFAssignment/') # must be image and not blank  
+    
+# for student submission    
+class AssignmentSubmission(models.Model):
+    assignment = models.ForeignKey(
+        DeadlineManagement,
+        on_delete=models.CASCADE,
+        related_name="submissions"
+    )
+    student = models.ForeignKey(
+        User,  # Student who submitted the answer
+        on_delete=models.CASCADE,
+        related_name="submitted_assignments"
+    )
+    submitted_at = models.DateField(auto_now_add=True)
+    answer_file = models.FileField(upload_to='uploads/LWFAssignment/Submissions/')
+
+    def status(self):
+        return "Submitted On Time" if self.submitted_at <= self.assignment.deadline else "Late Submission"      
+          
+          
