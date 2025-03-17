@@ -36,11 +36,13 @@ urlpatterns = [
     path('api/allcourses/', views.DisplayCourses),
     path('api/coursedetails/<id>/', views.DisplayOneCourses),
     path('api/inscoursedetails/<id>/', views.INSDisplayOneCourses),
+    path('api/assessmentdetails/<id>/', views.DisplayOneAssessments),
     path('api/coursemodify/<username>/<id>/', views.CourseEditByInstructor),
     path('api/instructor/assignment-modify/<username>/<id>/', views.AssignmentEditByInstructor),
     path('api/deletecourse/<username>/<id>/', views.CourseDeleteByInstructor),
     path('api/instructor/delete-assignment/<username>/<id>/', views.AssignmentDeleteByInstructor),
     path('api/specificcourses/<username>/', views.DisplaySpecificCourses),
+    path('api/instructor/specificassessment/<username>/', views.DisplaySpecificAssessment),
     path('api/specificclasses/<username>/', views.DisplaySpecificClass),
     path('api/student/displayclasses/', views.DisplayClasses),
     path('api/user-activity/', views.UserActivityAPIView),
@@ -53,7 +55,7 @@ urlpatterns = [
     path('api/instructor/create-lwf-assessment/', LWFAssessmentCreateAPIView.as_view()),
     path('api/instructor/create-assignment/', DeadlineAssignment.as_view()),
     path('api/home/dynamicdisplay/', views.DisplayTotalCourses),
-    path('api/assignments/<int:id>/submit/', views.submit_assignment, name='submit-assignment'),
+    path('api/student/assignments/<int:id>/submit/', views.submit_assignment, name='submit-assignment'),
     path('api/instructor/view-submissions/', views.teacher_submissions, name='teacher-submissions'),
    
     

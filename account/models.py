@@ -93,7 +93,9 @@ class DeadlineManagement(models.Model):
     
 
     # File uploaders for documents (e.g., Notes, thumbnails, video, ppt etc etc.)
-    content = models.FileField(upload_to='uploads/LWFAssignment/') # must be image and not blank  
+    content = models.FileField(upload_to='uploads/LWFAssignment/') # must be image and not blank 
+    def __str__(self):
+        return f"Subject- {self.subject}, Topic- {self.topic}"  
     
 # for student submission    
 class AssignmentSubmission(models.Model):
@@ -111,6 +113,8 @@ class AssignmentSubmission(models.Model):
     answer_file = models.FileField(upload_to='uploads/LWFAssignment/Submissions/')
 
     def status(self):
-        return "Submitted On Time" if self.submitted_at <= self.assignment.deadline else "Late Submission"      
+        return "Submitted On Time" if self.submitted_at <= self.assignment.deadline else "Late Submission" 
+    def __str__(self):
+        return f"{self.topic} - {self.subject}"     
           
           

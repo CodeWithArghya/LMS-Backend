@@ -921,7 +921,28 @@ def DisplayAssignment(request):
         return Response({'assessments':serial.data}, status=status.HTTP_200_OK)
     else:
         return Response({'msg':'No any Assignment Found'}, status=status.HTTP_404_NOT_FOUND)  
+
+# display assessment uploaded by specific instructor
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplaySpecificAssessment(request, username):
     
+    if request.method == "GET":
+        assessment = DeadlineManagement.objects.filter(uploaded_by=username)
+        serial = DeadlineSerial(assessment, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Assessment Found'}, status=status.HTTP_404_NOT_FOUND) 
+#specific assessments details
+@api_view(['GET'])
+def DisplayOneAssessments(request, id):
+    try:
+        assessments = DeadlineManagement.objects.get( id=id)
+        serial = DeadlineSerial(assessments)  # No need for `many=True` as it's a single object
+        return Response({'assessment': serial.data}, status=status.HTTP_200_OK)
+    except DeadlineManagement.DoesNotExist:
+        return Response({'msg': 'No Assessment Found'}, status=status.HTTP_404_NOT_FOUND)      
     
 # for delete
 @api_view(['GET',  'DELETE'])
@@ -968,4 +989,4 @@ def teacher_submissions(request):
 
     submissions = AssignmentSubmission.objects.filter(assignment__uploaded_by=user)
     serializer = AssignmentSubmissionSerializer(submissions, many=True)
-    return Response(serializer.data)
+    return Response({'courses':serializer.data})
