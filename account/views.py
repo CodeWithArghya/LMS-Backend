@@ -243,10 +243,81 @@ def UserLogin(request):
                 
                 
             })
-        return Response({"message":"Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)    
-            
-            
+        return Response({"message":"Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST) 
+ 
+ 
+import random
+import string
     
+# user forget password
+# Function to generate a random password
+def generate_random_password():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+@api_view(['POST'])
+def UserForgetPassword(request):
+    if request.method == "POST":
+        data = request.data
+        username = data.get("username")
+        email = data.get("email")
+
+        user = User.objects.filter(username=username, email=email).first()
+
+        if not user:
+            return Response({"message": "User does not exist or Email ID does ot match with our DB records. Please try again."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate a new random password
+        new_password = generate_random_password()
+
+        # Set the new password
+        user.set_password(new_password)
+        user.save()
+
+        # Send email with the new password
+        subject = "Password Reset Request"
+        message = f"""
+        Hello {user.username},
+
+        Your new password is: {new_password} against User ID: {user.username}
+
+        Please log in and change your password from dashboard immediately for security reasons.
+
+        Regards,
+        Learn With Fun Support Team
+        """
+        send_mail(subject, message, "eduhublmsofficials@gmail.com", [user.email])
+
+        return Response({"message": "A new password has been sent to your email successfully."}, status=status.HTTP_200_OK)
+
+
+# for changing password : for both student and instructor
+@api_view(['POST'])
+def UserChangePassword(request, username):
+    data = request.data
+    old_password = data.get("password")
+    new_password = data.get("npass")
+    confirm_password = data.get("cpass")
+
+    # Check if user exists
+    user = User.objects.filter(username=username).first()
+
+    if not user:
+        return Response({"message": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Validate old password
+    if not user.check_password(old_password):
+        return Response({"message": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validate new password match
+    if new_password != confirm_password:
+        return Response({"message": "New Password and Confirm Password must match."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Set new password
+    user.set_password(new_password)
+    user.save()
+
+    return Response({"message": "Your password has been changed successfully."}, status=status.HTTP_200_OK)
+
 # profile access by token only
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

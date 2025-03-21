@@ -27,6 +27,8 @@ urlpatterns = [
     path('auth/student/register/', views.UserSignup),
     path("auth/student/verify-otp/", views.VerifyOTP),
     path('auth/student/login/', views.UserLogin),
+    path('auth/student/password-reset/', views.UserForgetPassword),
+    path('auth/student/change-password/<username>/',views.UserChangePassword),
     path('auth/student/profile/',views.UserProfile),
     path('auth/instructor/signup/', views.InstructorSignup),
     path('auth/instructor/otp-verify/', views.OtpVerifyInstructor),
