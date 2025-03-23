@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 class CourseCreateform(models.Model):
@@ -115,6 +116,38 @@ class AssignmentSubmission(models.Model):
     def status(self):
         return "Submitted On Time" if self.submitted_at <= self.assignment.deadline else "Late Submission" 
     def __str__(self):
-        return f"{self.topic} - {self.subject}"     
+        return f"{self.topic} - {self.subject}"  
+    
+    
+# Feedback form
+class StudentReview(models.Model):
+    student_name = models.CharField(max_length=50)
+    parent_name = models.CharField(max_length=50)
+    contact = models.CharField(max_length=15)
+    email = models.EmailField(unique=True)
+    review_message = models.TextField(max_length=500)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)]) 
+    def __str__(self):
+        return f"{self.student_name} - {self.rating} Stars"  
+    
+    
+    
+# Instructor Feedback form  
+class InstructorFeedbackForm(models.Model):
+    
+    
+    teacher_name = models.CharField(max_length=50)
+    contact = models.CharField(max_length=15)
+    email = models.EmailField(unique=True)
+    review_message = models.TextField(max_length=500)
+    submitted_at = models.DateField(auto_now_add=True)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)]) 
+    objects = models.Manager()
+
+    
+    def __str__(self):
+        return f"{self.teacher_name} - {self.rating} Stars" 
+          
           
           

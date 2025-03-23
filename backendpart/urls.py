@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from account import views
 from rest_framework.routers import DefaultRouter
-from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment
+from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment, StudentFeedback, InstructorFeedback
 
 
 
@@ -48,11 +48,15 @@ urlpatterns = [
     path('api/specificclasses/<username>/', views.DisplaySpecificClass),
     path('api/student/displayclasses/', views.DisplayClasses),
     path('api/user-activity/', views.UserActivityAPIView),
+    path('api/displaystudentfeedback/', views.DisplayStudentFeedback),
+    path('api/displayinstructorfeedback/', views.DisplayInstructorFeedback),
     path('api/object/', views.analyze_image),
     path('api/student/displaylwfassessment/', views.DisplayLWFAssessment),
     path('api/instructor/class-delete/<username>/<id>/', views.ClassDeleteByInstructor),
     path('api/instructor/create-course/', CourseCreateAPIView.as_view()),
+    path('api/instructor/submit-feedback/', InstructorFeedback.as_view()),
     path('api/instructor/create-class/', ClassCreateAPIView.as_view()),
+    path('api/student/feedback-submission/', StudentFeedback.as_view()),
     path('api/student/display-assignments/', views.DisplayAssignment),
     path('api/instructor/create-lwf-assessment/', LWFAssessmentCreateAPIView.as_view()),
     path('api/instructor/create-assignment/', DeadlineAssignment.as_view()),

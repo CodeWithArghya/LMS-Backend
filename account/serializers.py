@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
+from account.models import CourseCreateform,InstructorFeedbackForm, StudentReview, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -82,7 +82,24 @@ class DeadlineSerial(serializers.ModelSerializer):
 
         return data    
     
-       
+class StudentReviewSerial(serializers.ModelSerializer):
+    class Meta:
+        model = StudentReview
+        fields = '__all__'
+    def validate(self, data):
+        if data['rating'] > 5 or data['rating']<1:
+            raise serializers.ValidationError("Rating must be greater than 0 and less than 5")
+        return data 
+    
+    
+class InstructorReviewSerial(serializers.ModelSerializer):
+    class Meta:
+        model = InstructorFeedbackForm
+        fields = '__all__'
+    def validate(self, data):
+        if data['rating'] > 5 or data['rating']<1:
+            raise serializers.ValidationError("Rating must be greater than 0 and less than 5")
+        return data               
     
 
 #for live class creation

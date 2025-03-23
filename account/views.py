@@ -5,12 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import authentication, permissions
-from .serializers import RegisterSerializer, CourseSerial,ClassSerial, LWFAssessmentSerial, DeadlineSerial, AssignmentSubmissionSerializer
+from .serializers import RegisterSerializer, CourseSerial, StudentReviewSerial, ClassSerial, LWFAssessmentSerial, DeadlineSerial, AssignmentSubmissionSerializer, InstructorReviewSerial
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 import random
-from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
+from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission, StudentReview, InstructorFeedbackForm
 from django.core.cache import cache 
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -1061,3 +1061,62 @@ def teacher_submissions(request):
     submissions = AssignmentSubmission.objects.filter(assignment__uploaded_by=user)
     serializer = AssignmentSubmissionSerializer(submissions, many=True)
     return Response({'courses':serializer.data})
+
+#sudent feedback submit (one email can be useed only once)
+class StudentFeedback(APIView):
+    
+    parser_classes = (MultiPartParser, FormParser)
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        
+        serializer = StudentReviewSerial(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'success', 'message': 'Review Submitted Successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# displaying the student feedback to admin
+
+@api_view(['GET'])
+
+def DisplayStudentFeedback(request):
+    
+    if request.method == "GET":
+        reviews = StudentReview.objects.all()
+        serial = StudentReviewSerial(reviews, many=True)
+        return Response({'studentreviews':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+# instructor feedback    
+class InstructorFeedback(APIView):
+    
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        
+        
+
+        serializer = InstructorReviewSerial(data=data)  # Use the correct serializer
+        if serializer.is_valid():
+            serializer.save()  # Pass user object, not username
+            
+            
+            return Response({'status': 'success', 'message': 'Feedback Submitted Successfully'}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+    
+ # admin view of instructor feedback   
+@api_view(['GET'])
+
+def DisplayInstructorFeedback(request):
+    
+    if request.method == "GET":
+        reviews = InstructorFeedbackForm.objects.all()
+        serial = InstructorReviewSerial(reviews, many=True)
+        return Response({'instructorreviews':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)        
+       
+    
