@@ -23,7 +23,9 @@ from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentC
 
 
 urlpatterns = [
-    
+    path('admin/', admin.site.urls),
+    path('auth/admin/login/', views.AdminLogin),
+    path('auth/admin/profile/', views.InstructorProfile),
     path('auth/student/register/', views.UserSignup),
     path("auth/student/verify-otp/", views.VerifyOTP),
     path('auth/student/login/', views.UserLogin),

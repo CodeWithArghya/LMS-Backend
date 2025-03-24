@@ -244,7 +244,27 @@ def UserLogin(request):
                 
             })
         return Response({"message":"Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST) 
- 
+
+# login for admin
+# login & token
+@api_view(['POST'])
+def AdminLogin(request):
+    if request.method == "POST":
+        data = request.data
+        username = data.get("username")
+        password = data.get("password")
+        if username == "principal":
+            user = User.objects.filter(username = username).first()
+            if user and user.check_password(password):
+            #generate token
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
+                
+                
+                })
+        return Response({"message":"Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
  
 import random
 import string
