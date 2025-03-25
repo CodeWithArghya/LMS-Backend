@@ -168,8 +168,8 @@ def VerifyOTP(request):
     Password: <span style="color: #D90000;">{password}</span>
 </p>
 
-        <p style="font-size: 16px; color: #555;">
-            Click the button below to log in to your account and start your learning journey.
+        <p style="font-size: 16px; color: #D90000;">
+            Click the button below to log in to your account & Its recommended to change your current password from your dashboard
         </p>
         <a href="http://localhost:3000/" style="
             display: block;
@@ -558,6 +558,68 @@ def InstructorProfile(request):
     user = request.user
     serializer = RegisterSerializer(user)
     return Response(serializer.data) 
+
+
+# feth all registered Student list to admin dashboard
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ViewStudentList(request):
+    
+    students = User.objects.filter(username__startswith="STD")
+    serializer = RegisterSerializer(students, many=True)
+    return Response({'registeredstudents':serializer.data}, status=status.HTTP_200_OK) 
+
+
+# for delete student by admin
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def StudentDeleteByAdmin(request, id):
+    # Fetch course uploaded by the specific instructor
+    student = User.objects.filter(id=id,username__startswith="STD").first()
+
+    if not student:
+        return Response({'msg': 'No Student Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = RegisterSerializer(student)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        student.delete()  # Proper deletion
+        return Response({'msg': 'Student Deleted Successfully'}, status=status.HTTP_200_OK)
+    
+# for delete instructor by admin
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def TeacherDeleteByAdmin(request, id):
+    # Fetch course uploaded by the specific instructor
+    student = User.objects.filter(id=id,username__startswith="INS").first()
+
+    if not student:
+        return Response({'msg': 'No Instructor Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = RegisterSerializer(student)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        student.delete()  # Proper deletion
+        return Response({'msg': 'Instructor Deleted Successfully'}, status=status.HTTP_200_OK)    
+
+# feth all registered Instructors list to admin dashboard
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ViewTeacherList(request):
+    
+    teachers = User.objects.filter(username__startswith="INS")
+    serializer = RegisterSerializer(teachers, many=True)
+    return Response({'registeredteachers':serializer.data}, status=status.HTTP_200_OK) 
 
 
 # security features to track user activity
