@@ -41,6 +41,8 @@ urlpatterns = [
     path('auth/instructor/login/', views.InstructorLogin),
     path('auth/instructor/profile/', views.InstructorProfile),
     path('api/user-activity/', views.UserActivityAPIView),
+    path('api/admin/approve-course/<username>/<id>/',views.ApproveCourse),
+    path('api/admin/reject-course/<username>/<id>/',views.RejectCourse),
     path('api/allcourses/', views.DisplayCourses),
     path('api/coursedetails/<id>/', views.DisplayOneCourses),
     path('api/inscoursedetails/<id>/', views.INSDisplayOneCourses),
@@ -69,6 +71,8 @@ urlpatterns = [
     path('api/home/dynamicdisplay/', views.DisplayTotalCourses),
     path('api/student/assignments/<int:id>/submit/', views.submit_assignment, name='submit-assignment'),
     path('api/instructor/view-submissions/', views.teacher_submissions, name='teacher-submissions'),
+    path('api/admin/display-pending-courses/<username>/', views.DisplayPendingCourses),
+    path('api/admin/display-approved-courses/<username>/', views.DisplayApprovedCourses),
    
     
 ]

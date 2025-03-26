@@ -688,6 +688,86 @@ def DisplayCourses(request):
     else:
         return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)
     
+# all pending course display to admin section only restricted to principal
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplayPendingCourses(request, username):
+
+    if username != "principal":
+        return Response({"msg": "Unauthorized Access"}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == "GET":
+            
+        courses = CourseCreateform.objects.filter(current_status="Pending")
+        serial = CourseSerial(courses, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND) 
+    
+# all approved course display to admin section only restricted to principal
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplayApprovedCourses(request, username):
+
+    if username != "principal":
+        return Response({"msg": "Unauthorized Access"}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == "GET":
+            
+        courses = CourseCreateform.objects.filter(current_status="Approved")
+        serial = CourseSerial(courses, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND) 
+
+# admin approve course    
+@api_view(['PATCH'])  # Using PATCH for partial updates
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ApproveCourse(request, username, id):
+    
+    if username != "principal":
+        return Response({"msg": "Unauthorized Access"}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        # Fetch the course by ID
+        course = CourseCreateform.objects.get(id=id)
+        
+        # Update the current_status field
+        course.current_status = "Approved"
+        course.save()
+
+        return Response({"message": "Course approved successfully!"}, status=status.HTTP_200_OK)
+
+    except CourseCreateform.DoesNotExist:
+        return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)           
+
+# admin approve course    
+@api_view(['PATCH'])  # Using PATCH for partial updates
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def RejectCourse(request, username, id):
+    
+    if username != "principal":
+        return Response({"msg": "Unauthorized Access"}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        # Fetch the course by ID
+        course = CourseCreateform.objects.get(id=id)
+        
+        # Update the current_status field
+        course.current_status = "Rejected"
+        course.save()
+
+        return Response({"message": "Course Rejected successfully!"}, status=status.HTTP_200_OK)
+
+    except CourseCreateform.DoesNotExist:
+        return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)           
+    
 #specific course details
 @api_view(['GET'])
 def DisplayOneCourses(request, id):
