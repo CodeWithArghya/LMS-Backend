@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from account.models import CourseCreateform,InstructorFeedbackForm, StudentReview, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
+from account.models import CourseCreateform,ContactForm,InstructorFeedbackForm, StudentReview, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -90,6 +90,21 @@ class StudentReviewSerial(serializers.ModelSerializer):
         if data['rating'] > 5 or data['rating']<1:
             raise serializers.ValidationError("Rating must be greater than 0 and less than 5")
         return data 
+    
+#for contact form
+class ContactSerial(serializers.ModelSerializer):
+    class Meta:
+        model = ContactForm
+        fields = '__all__'
+    
+    def validate(self, data):
+        if data['email'] == None and data['fullname'] == None:
+            raise serializers.ValidationError("Full name and Email Cannot be Blank")
+        return data
+    def validate(self, data):
+        if data['message'] == None :
+            raise serializers.ValidationError("Message Cannot be Blank")
+        return data    
     
     
 class InstructorReviewSerial(serializers.ModelSerializer):

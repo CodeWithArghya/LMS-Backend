@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from account import views
 from rest_framework.routers import DefaultRouter
-from account.views import CourseCreateAPIView,ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment, StudentFeedback, InstructorFeedback
+from account.views import CourseCreateAPIView,Contact, ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment, StudentFeedback, InstructorFeedback
 
 
 
@@ -27,8 +27,10 @@ urlpatterns = [
     path('auth/admin/login/', views.AdminLogin),
     path('auth/admin/profile/', views.InstructorProfile),
     path('api/admin/view-students/', views.ViewStudentList),
+    path('api/admin/display-contact-query/', views.DisplayContactForm),
     path('api/admin/delete-student/<id>/', views.StudentDeleteByAdmin),
     path('api/admin/delete-instructor/<id>/', views.TeacherDeleteByAdmin),
+    path('api/admin/delete-query/<id>/', views.QueryDeleteByAdmin),
     path('api/admin/view-instructors/', views.ViewTeacherList),
     path('auth/student/register/', views.UserSignup),
     path("auth/student/verify-otp/", views.VerifyOTP),
@@ -65,6 +67,7 @@ urlpatterns = [
     path('api/instructor/submit-feedback/', InstructorFeedback.as_view()),
     path('api/instructor/create-class/', ClassCreateAPIView.as_view()),
     path('api/student/feedback-submission/', StudentFeedback.as_view()),
+    path('api/general/contactform-submission/', Contact.as_view()),
     path('api/student/display-assignments/', views.DisplayAssignment),
     path('api/instructor/create-lwf-assessment/', LWFAssessmentCreateAPIView.as_view()),
     path('api/instructor/create-assignment/', DeadlineAssignment.as_view()),
@@ -73,6 +76,7 @@ urlpatterns = [
     path('api/instructor/view-submissions/', views.teacher_submissions, name='teacher-submissions'),
     path('api/admin/display-pending-courses/<username>/', views.DisplayPendingCourses),
     path('api/admin/display-approved-courses/<username>/', views.DisplayApprovedCourses),
+     path('api/admin/display-rejected-courses/<username>/', views.DisplayRejectedCourses),
    
     
 ]

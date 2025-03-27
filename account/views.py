@@ -5,12 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import authentication, permissions
-from .serializers import RegisterSerializer, CourseSerial, StudentReviewSerial, ClassSerial, LWFAssessmentSerial, DeadlineSerial, AssignmentSubmissionSerializer, InstructorReviewSerial
+from .serializers import RegisterSerializer, CourseSerial, ContactSerial, StudentReviewSerial, ClassSerial, LWFAssessmentSerial, DeadlineSerial, AssignmentSubmissionSerializer, InstructorReviewSerial
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 import random
-from account.models import CourseCreateform, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission, StudentReview, InstructorFeedbackForm
+from account.models import CourseCreateform, ContactForm, ClassCreateform, LWFAssessmentCreateform, DeadlineManagement, AssignmentSubmission, StudentReview, InstructorFeedbackForm
 from django.core.cache import cache 
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -611,7 +611,26 @@ def TeacherDeleteByAdmin(request, id):
     elif request.method == "DELETE":
         student.delete()  # Proper deletion
         return Response({'msg': 'Instructor Deleted Successfully'}, status=status.HTTP_200_OK)    
+# for delete query by admin
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def QueryDeleteByAdmin(request, id):
+    # Fetch query
+    query = ContactForm.objects.filter(id=id).first()
 
+    if not query:
+        return Response({'msg': 'No Query  Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = ContactSerial(query)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        query.delete()  # Proper deletion
+        return Response({'msg': 'Query Deleted Successfully'}, status=status.HTTP_200_OK)  
 # feth all registered Instructors list to admin dashboard
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -719,6 +738,22 @@ def DisplayApprovedCourses(request, username):
         return Response({'courses':serial.data}, status=status.HTTP_200_OK)
     else:
         return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND) 
+    
+# all rejected course display to admin section only restricted to principal
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def DisplayRejectedCourses(request, username):
+
+    if username != "principal":
+        return Response({"msg": "Unauthorized Access"}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == "GET":
+            
+        courses = CourseCreateform.objects.filter(current_status="Rejected")
+        serial = CourseSerial(courses, many=True)
+        return Response({'courses':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)     
 
 # admin approve course    
 @api_view(['PATCH'])  # Using PATCH for partial updates
@@ -1237,6 +1272,19 @@ class StudentFeedback(APIView):
             return Response({'status': 'success', 'message': 'Review Submitted Successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+#contact submit to admin
+class Contact(APIView):
+    
+    parser_classes = (MultiPartParser, FormParser)
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        
+        serializer = ContactSerial(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'success', 'message': 'Query Submitted Successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+    
 # displaying the student feedback to admin
 
 @api_view(['GET'])
@@ -1249,6 +1297,19 @@ def DisplayStudentFeedback(request):
         return Response({'studentreviews':serial.data}, status=status.HTTP_200_OK)
     else:
         return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+# displaying the contact form to admin
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def DisplayContactForm(request):
+    
+    if request.method == "GET":
+        query = ContactForm.objects.all()
+        serial = ContactSerial(query, many=True)
+        return Response({'query':serial.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Query Found'}, status=status.HTTP_404_NOT_FOUND)      
     
 # instructor feedback    
 class InstructorFeedback(APIView):

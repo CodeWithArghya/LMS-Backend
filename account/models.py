@@ -129,7 +129,34 @@ class StudentReview(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)]) 
     def __str__(self):
-        return f"{self.student_name} - {self.rating} Stars"  
+        return f"{self.student_name} - {self.rating} Stars"
+    
+    
+# Contact form
+
+
+class ContactForm(models.Model):
+    fullname = models.CharField(max_length=50)
+
+    QUERY_CHOICES = [
+        ('generalquery', 'General Query'),
+        ('report', 'Report'),
+        ('help', 'Help/Support'),
+    ]
+
+    query_type = models.CharField(max_length=20, choices=QUERY_CHOICES)  
+
+    contact = models.CharField(max_length=15, null=True)
+    email = models.EmailField()
+    message = models.TextField(max_length=500)
+    attachments = models.FileField(upload_to='uploads/contact/', null=True, blank=True)
+    submitted_on = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fullname} - {self.query_type}"
+
+    
+        
     
     
     
