@@ -76,7 +76,8 @@ urlpatterns = [
     path('api/instructor/view-submissions/', views.teacher_submissions, name='teacher-submissions'),
     path('api/admin/display-pending-courses/<username>/', views.DisplayPendingCourses),
     path('api/admin/display-approved-courses/<username>/', views.DisplayApprovedCourses),
-     path('api/admin/display-rejected-courses/<username>/', views.DisplayRejectedCourses),
+    path('api/admin/display-rejected-courses/<username>/', views.DisplayRejectedCourses),
+    path('api/aireview-analysis/', views.analyze_review), 
    
     
 ]

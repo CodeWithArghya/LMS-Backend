@@ -1265,7 +1265,6 @@ class StudentFeedback(APIView):
     parser_classes = (MultiPartParser, FormParser)
     def post(self, request, *args, **kwargs):
         data = request.data
-        
         serializer = StudentReviewSerial(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -1340,6 +1339,86 @@ def DisplayInstructorFeedback(request):
         serial = InstructorReviewSerial(reviews, many=True)
         return Response({'instructorreviews':serial.data}, status=status.HTTP_200_OK)
     else:
-        return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)        
-       
+        return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)  
     
+
+
+# ai based review analysis
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
+import requests
+import json
+from .models import StudentReview  # make sure this import is correct
+
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
+import requests
+import json
+import re
+from .models import StudentReview
+
+@api_view(['GET'])
+def analyze_review(request):
+    # Get all review messages
+    feedback_list = StudentReview.objects.values_list('review_message', flat=True)
+    feedback_text = "\n".join(feedback_list)
+
+    # Gemini API config
+    api_key = "AIzaSyD9geiD-UIbtjlYr5RFPY6ZaDrktPlw648"
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+
+    # Prompt
+    prompt = (
+        "Below are feedback messages from users about a website or service:\n\n"
+        f"{feedback_text}\n\n"
+        "Please analyze the overall sentiment and extract the most relevant keywords that summarize the feedback. "
+        "Return the result as valid JSON in this format:\n"
+        "{\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", ...]\n}"
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(api_url, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+
+            # Safely extract the text
+            text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+
+            if not text:
+                return JsonResponse({"error": "No content returned by Gemini API"}, status=500)
+
+            # Extract JSON from markdown-wrapped content
+            json_match = re.search(r"```json\n(.*?)\n```", text, re.DOTALL)
+            if json_match:
+                text = json_match.group(1).strip()
+
+            try:
+                parsed_response = json.loads(text)
+                keywords = parsed_response.get("keywords", [])
+
+                return JsonResponse({"keywords": keywords}, safe=False)
+
+            except json.JSONDecodeError as e:
+                return JsonResponse({
+                    "error": f"Failed to parse JSON: {str(e)}",
+                    "raw": text
+                }, status=500)
+
+        else:
+            return JsonResponse(
+                {"error": "Error from Gemini API", "details": response.text},
+                status=response.status_code
+            )
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": "Network error", "details": str(e)}, status=500)
