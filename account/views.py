@@ -1369,12 +1369,17 @@ def analyze_review(request):
 
     # Prompt
     prompt = (
-        "Below are feedback messages from users about a website or service:\n\n"
-        f"{feedback_text}\n\n"
-        "Please analyze the overall sentiment and extract the most relevant keywords that summarize the feedback. "
-        "Return the result as valid JSON in this format:\n"
-        "{\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", ...]\n}"
-    )
+    "You are an intelligent feedback analysis bot.\n\n"
+    "Given multiple user reviews about a product, website, or service, your job is to:\n"
+    "1. Generate a summary in under 100 words that reflects the overall sentiment and opinions.\n"
+    "2. Classify each review as either 'positive' or 'negative'.\n\n"
+    "Input is in the following JSON format:\n"
+    "{reviews: ['Wonderful Product', 'I don't like it', 'Just Love this, awesome Product']}\n\n"
+    "Output the result in JSON format:\n"
+    "{summary: 'summary here', keywords: ['positive', 'negative', 'positive']}\n\n"
+    f"Input: {feedback_text}"
+)
+
 
     payload = {
         "contents": [
