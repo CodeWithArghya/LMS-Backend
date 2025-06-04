@@ -78,6 +78,11 @@ urlpatterns = [
     path('api/admin/display-approved-courses/<username>/', views.DisplayApprovedCourses),
     path('api/admin/display-rejected-courses/<username>/', views.DisplayRejectedCourses),
     path('api/aireview-analysis/', views.analyze_review), 
+    path('api/displaycount/', views.DisplayCourseCount),
+    path('api/displayusercount/', views.DisplayUserCount),
+    path('api/displayquerycount/', views.DisplayQueryCount),
+    path('api/displayassessmentcount/', views.DisplayAssessmentsCount),
+    
    
     
 ]

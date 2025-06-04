@@ -753,7 +753,54 @@ def DisplayRejectedCourses(request, username):
         serial = CourseSerial(courses, many=True)
         return Response({'courses':serial.data}, status=status.HTTP_200_OK)
     else:
-        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)     
+        return Response({'msg':'No Course Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+# display total number of approved, pending and rejected courses to admin section only 
+@api_view(['GET'])
+
+def DisplayCourseCount(request):
+
+   
+    if request.method == "GET":
+            
+        approved_count = CourseCreateform.objects.filter(current_status="Approved").count()
+        pending_count = CourseCreateform.objects.filter(current_status="Pending").count()
+        rejected_count = CourseCreateform.objects.filter(current_status="Rejected").count() 
+        
+        return Response({
+        "result": {
+        "approved_count": approved_count,
+        "pending_count": pending_count,
+        "rejected_count": rejected_count
+    }
+}, status=status.HTTP_200_OK)
+
+    else:
+        return Response({'msg':'Went Wrong'}, status=status.HTTP_404_NOT_FOUND)  
+    
+# display total number of registered Students and Instructors to Admin Panel
+@api_view(['GET'])
+
+def DisplayUserCount(request):
+
+   
+    if request.method == "GET":
+            
+        student = User.objects.filter(username__startswith="STD").count()
+        instructors = User.objects.filter(username__startswith="INS").count()
+        
+         
+        
+        return Response({
+        "result": {
+        "student": student,
+        "instructor": instructors,
+        
+    }
+}, status=status.HTTP_200_OK)
+
+    else:
+        return Response({'msg':'Something Went Wrong'}, status=status.HTTP_404_NOT_FOUND)             
 
 # admin approve course    
 @api_view(['PATCH'])  # Using PATCH for partial updates
@@ -1210,7 +1257,22 @@ def DisplayOneAssessments(request, id):
         serial = DeadlineSerial(assessments)  # No need for `many=True` as it's a single object
         return Response({'assessment': serial.data}, status=status.HTTP_200_OK)
     except DeadlineManagement.DoesNotExist:
-        return Response({'msg': 'No Assessment Found'}, status=status.HTTP_404_NOT_FOUND)      
+        return Response({'msg': 'No Assessment Found'}, status=status.HTTP_404_NOT_FOUND)  
+    
+#assessments count
+@api_view(['GET'])
+def DisplayAssessmentsCount(request):
+    try:
+        assessments = DeadlineManagement.objects.count()
+        
+        return Response({'assessment': assessments}, status=status.HTTP_200_OK)
+    except DeadlineManagement.DoesNotExist:
+        return Response({
+        "result": {
+        "assessment":assessments,
+        
+    }
+}, status=status.HTTP_404_NOT_FOUND)          
     
 # for delete
 @api_view(['GET',  'DELETE'])
@@ -1284,6 +1346,17 @@ class Contact(APIView):
             return Response({'status': 'success', 'message': 'Query Submitted Successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
     
+# number of queries    
+@api_view(['GET'])
+
+def DisplayQueryCount(request):
+    
+    if request.method == "GET":
+        result = ContactForm.objects.count()
+        
+        return Response({'result':result}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':'No any Reviews Found'}, status=status.HTTP_404_NOT_FOUND)     
 # displaying the student feedback to admin
 
 @api_view(['GET'])
