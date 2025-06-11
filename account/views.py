@@ -1500,3 +1500,48 @@ def analyze_review(request):
 
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": "Network error", "details": str(e)}, status=500)
+
+# fetch & display all user feedback in Admin Panel
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def viewfeedbackadmin(request):
+    feedbacks = StudentReview.objects.all()
+    serializer = StudentReviewSerial(feedbacks, many=True)
+    return Response({'feedback':serializer.data}, status=status.HTTP_200_OK)  
+ 
+# for delete feedback by admin
+@api_view(['GET',  'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def FeedbackDeleteByAdmin(request, id):
+    # Fetch query
+    feedback = StudentReview.objects.filter(id=id).first()
+
+    if not feedback:
+        return Response({'msg': 'No feedback  Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serial = StudentReviewSerial(feedback)
+        return Response(serial.data, status=status.HTTP_200_OK)
+
+   
+
+    elif request.method == "DELETE":
+        feedback.delete()  # Proper deletion
+        return Response({'msg': 'Feedback Deleted Successfully'}, status=status.HTTP_200_OK)
+    
+    
+#assessments count
+@api_view(['GET'])
+def DisplayUserreviewCount(request):
+    try:
+        review = StudentReview.objects.count()
+        
+        return Response({'review': review}, status=status.HTTP_200_OK)
+    except StudentReview.DoesNotExist:
+        return Response({
+        "result": {
+        "review":review,
+        
+    }
+}, status=status.HTTP_404_NOT_FOUND)         

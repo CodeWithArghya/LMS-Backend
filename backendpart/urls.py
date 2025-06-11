@@ -27,10 +27,12 @@ urlpatterns = [
     path('auth/admin/login/', views.AdminLogin),
     path('auth/admin/profile/', views.InstructorProfile),
     path('api/admin/view-students/', views.ViewStudentList),
+    path('api/admin/view-feedback/', views.viewfeedbackadmin),
     path('api/admin/display-contact-query/', views.DisplayContactForm),
     path('api/admin/delete-student/<id>/', views.StudentDeleteByAdmin),
     path('api/admin/delete-instructor/<id>/', views.TeacherDeleteByAdmin),
     path('api/admin/delete-query/<id>/', views.QueryDeleteByAdmin),
+    path('api/admin/delete-feedback/<id>/', views.FeedbackDeleteByAdmin),
     path('api/admin/view-instructors/', views.ViewTeacherList),
     path('auth/student/register/', views.UserSignup),
     path("auth/student/verify-otp/", views.VerifyOTP),
@@ -82,6 +84,7 @@ urlpatterns = [
     path('api/displayusercount/', views.DisplayUserCount),
     path('api/displayquerycount/', views.DisplayQueryCount),
     path('api/displayassessmentcount/', views.DisplayAssessmentsCount),
+    path('api/displayuserreviewcount/', views.DisplayUserreviewCount),
     
    
     
