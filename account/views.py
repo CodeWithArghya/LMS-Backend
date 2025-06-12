@@ -946,7 +946,7 @@ class ClassCreateAPIView(APIView):
             serializer.save()
 
             # ✅ Send a POST request to the external API (no payload)
-            external_api_url = "https://wcsp440x1d.execute-api.ap-south-1.amazonaws.com/default/ParentsMeet/demo"
+            external_api_url = "https://12y8sqod1g.execute-api.ap-south-1.amazonaws.com/default/classscheduled"
 
             try:
                 requests.post(external_api_url, timeout=20)  # ✅ No data sent, just a POST request

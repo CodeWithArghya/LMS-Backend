@@ -91,10 +91,10 @@ WSGI_APPLICATION = 'backendpart.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL engine
-        'NAME': 'LMS',              # Replace with your database name
+        'NAME': 'lms',              # Replace with your database name
         'USER': 'postgres',              # Replace with your database user
-        'PASSWORD': 'Arghya@2002',      # Replace with your database password
-        'HOST': 'localhost',                       # Use 'localhost' for local setup or the IP address of the database server
+        'PASSWORD': 'Arghya2002',      # Replace with your database password
+        'HOST': 'lms.c52244sqy91z.ap-south-1.rds.amazonaws.com',# Use 'localhost' for local setup or the IP address of the database server
         'PORT': '5432',                            # Default PostgreSQL port
     }
 }

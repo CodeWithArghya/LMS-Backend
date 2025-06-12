@@ -7,11 +7,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Database Configuration
-      - POSTGRES_DB=Eduhub
-      - POSTGRES_USER=arghya
-      - POSTGRES_PASSWORD=arghya1234
-      - POSTGRES_HOST=db
+      # Database Configuration (use your AWS RDS hostname)
+      - POSTGRES_DB=lms
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Arghya2002
+      - POSTGRES_HOST=lms.c52244sqy91z.ap-south-1.rds.amazonaws.com
       - POSTGRES_PORT=5432
 
       # Email Configuration
@@ -22,25 +22,14 @@ services:
       - EMAIL_HOST_USER=eduhublmsofficials@gmail.com
       - EMAIL_HOST_PASSWORD=otgw rzoi jsao pcmw
 
-      # AWS Configuration (Optional, if using boto3)
+      # AWS S3 Configuration (Optional)
       - AWS_ACCESS_KEY_ID=AKIA5MSUBVORPWUDFLPJ
       - AWS_SECRET_ACCESS_KEY=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
       - AWS_STORAGE_BUCKET_NAME=lmseduhub
       - AWS_S3_REGION_NAME=ap-south-1
 
-    depends_on:
-      - db
     volumes:
-      - ./app:/app  # Maps your local code to the container for development (optional)
-
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: Eduhub
-      POSTGRES_USER: arghya
-      POSTGRES_PASSWORD: arghya1234
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./app:/app  # optional for development
 
 volumes:
   postgres_data:
