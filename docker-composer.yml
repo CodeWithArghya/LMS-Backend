@@ -28,6 +28,11 @@ services:
       - AWS_STORAGE_BUCKET_NAME=lmseduhub
       - AWS_S3_REGION_NAME=ap-south-1
 
+      - GEMINI_API_KEY = 'AIzaSyD9geiD-UIbtjlYr5RFPY6ZaDrktPlw648'
+      - GOOGLE_VISION_API_KEY = 'AIzaSyD9hIOK7PI72BIPIWpRne1zBzV9wgRILiI'
+
+
+
     volumes:
       - ./app:/app  # optional for development
 
