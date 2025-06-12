@@ -1,31 +1,34 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Image to AWS ECR
 
 on:
   push:
     branches:
-      - main  # Trigger workflow on push to main branch
+      - main
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code from the repository
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Log in to Docker Hub using credentials stored in GitHub Secrets
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}  # GitHub Secret for Docker username
-        password: ${{ secrets.DOCKER_PASSWORD }}  # GitHub Secret for Docker password
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
 
-    # Build the Docker image and push it to Docker Hub
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .  # Path to your project directory (root of the repository)
-        push: true  # Push the image to Docker Hub after building
-        tags: ${{ secrets.DOCKER_USERNAME }}/django-app:latest  # Tag for the Docker image
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Build, tag, and push image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: django-app
+        IMAGE_TAG: latest
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
