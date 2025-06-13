@@ -1335,16 +1335,24 @@ class StudentFeedback(APIView):
     
 #contact submit to admin
 class Contact(APIView):
-    
     parser_classes = (MultiPartParser, FormParser)
+
     def post(self, request, *args, **kwargs):
         data = request.data
-        
+
+        # Check if file exists in request.FILES
+        files = request.FILES.get('attachments', None)
+
+        # Merge files into data if exists
+        if files:
+            data['attachments'] = files
+
         serializer = ContactSerial(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'success', 'message': 'Query Submitted Successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
     
 # number of queries    
 @api_view(['GET'])
