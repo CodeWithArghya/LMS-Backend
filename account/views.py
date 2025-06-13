@@ -1552,4 +1552,57 @@ def DisplayUserreviewCount(request):
         "review":review,
         
     }
-}, status=status.HTTP_404_NOT_FOUND)         
+}, status=status.HTTP_404_NOT_FOUND)  
+        
+        
+        
+# views.py
+import pandas as pd
+
+
+from .serializers import UserExcelRowSerializer
+
+class UserExcelUploadAPIView(APIView):
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('file')
+
+        if not file_obj:
+            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # read excel
+            df = pd.read_excel(file_obj)
+
+            required_columns = ['username','first_name', 'last_name', 'email', 'password', 'password2']
+            if not all(col in df.columns for col in required_columns):
+                return Response({"error": f"Excel must have columns: {', '.join(required_columns)}"}, status=400)
+
+            created_users = []
+            errors = []
+
+            for index, row in df.iterrows():
+                user_data = {
+                      # Assuming 'id' is a unique identifier
+                    'username': str(row['username']),
+                    'first_name': row['first_name'],
+                    'last_name': row['last_name'],
+                    'email': row['email'],
+                    'password': str(row['password']),
+                    'password2': str(row['password2']),
+                }
+
+                serializer = UserExcelRowSerializer(data=user_data)
+                if serializer.is_valid():
+                    serializer.save()
+                    created_users.append(user_data['username'])
+                else:
+                    errors.append({ 'row': index+2, 'errors': serializer.errors })
+
+            return Response({
+                'created_users': created_users,
+                'errors': errors
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+               

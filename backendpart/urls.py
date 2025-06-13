@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from account import views
 from rest_framework.routers import DefaultRouter
-from account.views import CourseCreateAPIView,Contact, ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment, StudentFeedback, InstructorFeedback
+from account.views import CourseCreateAPIView,Contact, UserExcelUploadAPIView, ClassCreateAPIView, LWFAssessmentCreateAPIView, DeadlineAssignment, StudentFeedback, InstructorFeedback
 
 
 
@@ -85,6 +85,7 @@ urlpatterns = [
     path('api/displayquerycount/', views.DisplayQueryCount),
     path('api/displayassessmentcount/', views.DisplayAssessmentsCount),
     path('api/displayuserreviewcount/', views.DisplayUserreviewCount),
+    path('api/bulk-user/', UserExcelUploadAPIView.as_view(), name='upload-users-excel')
     
    
     
