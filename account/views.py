@@ -1545,6 +1545,7 @@ def DisplayUserreviewCount(request):
     try:
         review = StudentReview.objects.count()
         
+        
         return Response({'review': review}, status=status.HTTP_200_OK)
     except StudentReview.DoesNotExist:
         return Response({
